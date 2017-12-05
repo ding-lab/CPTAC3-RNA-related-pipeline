@@ -6,7 +6,7 @@ Cufflinks is downloaded from http://cole-trapnell-lab.github.io/cufflinks/instal
 
 
 #Processing
-first run 'perl get_link.pl' to generate 'to_run.sh' file
+first run 'perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat' to generate 'to_run.sh' file
 
 then run 'bash to_run.sh', which 1) maps fastq file to human genome using MapSplice; 2) processes bam file from MapSplice to estimate transcript expression using Cufflinks; 3) convert GTF file from Cufflinks to BED12 using custom Perl script Convert_GTF_To_Bed12.pl
 
