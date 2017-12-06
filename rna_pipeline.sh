@@ -50,7 +50,17 @@ cd ${sample}
 #STAR-Fusion --left_fq $fq_1 --right_fq $fq_2 --CPU $cpu --annotate --examine_coding_effect --genome_lib_dir $genome_lib_dir --output_dir STAR_FUSION
 
 #EricScript
-genome_db=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/ericscript_db_homosapiens_ensembl73
-rm -fr ERICSCRIPT
-ericscript.pl -o ERICSCRIPT --remove -ntrim 0 --refid homo_sapiens -db $genome_db -p $cpu -name $sample $fq_1 $fq_2
+#genome_db=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/ericscript_db_homosapiens_ensembl73
+#rm -fr ERICSCRIPT
+#ericscript.pl -o ERICSCRIPT --remove -ntrim 0 --refid homo_sapiens -db $genome_db -p $cpu -name $sample $fq_1 $fq_2
 
+#Integrate
+#bwts=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/Integrate/bwts
+#bam_dir=/gscmnt/gc2521/dinglab/qgao/RNA/Batch_20171110/$sample/TOPHAT/
+#fasta=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/Integrate/hg19.fa
+#annot=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/Integrate/annot.ensembl.GRCh37.txt
+#rm -fr Integrate
+#mkdir -p Integrate
+#samtools index $bam_dir/accepted_hits.bam
+#samtools index $bam_dir/unmapped.bam
+#Integrate fusion -reads Integrate/reads.txt -sum Integrate/summary.tsv -ex Integrate/exons.tsv -bk Integrate/breakpoints.tsv -vcf Integrate/bk_sv.vcf -bedpe Integrate/fusions.bedpe $fasta $annot $bwts $bam_dir/accepted_hits.bam $bam_dir/unmapped.bam

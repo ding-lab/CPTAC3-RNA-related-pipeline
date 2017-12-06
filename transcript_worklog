@@ -1,4 +1,7 @@
 
+#Reference
+Genome sequence and annotation are downloaded from Ensembl (GRCh37.75)
+
 #Tools
 MapSplice is downloaded from http://www.netlab.uky.edu/p/bioinfo/MapSplice2
 Cufflinks is downloaded from http://cole-trapnell-lab.github.io/cufflinks/install/
