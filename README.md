@@ -11,17 +11,27 @@ Genome sequence and annotation are downloaded from Ensembl (GRCh37.75)
 # Tools
 
 MapSplice is downloaded from http://www.netlab.uky.edu/p/bioinfo/MapSplice2
+
 Cufflinks is downloaded from http://cole-trapnell-lab.github.io/cufflinks/install/
 
 # Processing
 
-first run `perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat` to generate 'to_run.sh' fil
-then run 'bash to_run.sh', which 1) maps fastq file to human genome using MapSplice; 2) processes bam file from MapSplice to estimate transcript expression using Cufflinks; 3) convert GTF file from Cufflinks to BED12 using custom Perl script Convert_GTF_To_Bed12.pl
+first run 
+`perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat`
+to generate 'to_run.sh' file
+
+then run `bash to_run.sh`
+, which 1) maps fastq file to human genome using MapSplice; 2) processes bam file from MapSplice to estimate transcript expression using Cufflinks; 3) convert GTF file from Cufflinks to BED12 using custom Perl script Convert_GTF_To_Bed12.pl
 
 # Output
 
 Output files can be found in 'TRANSCRIPT_BED/' of each sample folder, reported in standard BED12 format with gene expression incorported in the 4th column (TranscriptID|FPKM)
+
 Detailed about BED12 format can be found in https://genome.ucsc.edu/FAQ/FAQformat.html.
+
+
+
+
 
 ####################
 ###### Fusion
