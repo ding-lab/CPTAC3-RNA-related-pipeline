@@ -17,7 +17,9 @@ Cufflinks is downloaded from http://cole-trapnell-lab.github.io/cufflinks/instal
 # Processing
 
 first run 
+
 `perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat`
+
 to generate 'to_run.sh' file
 
 then run `bash to_run.sh`
