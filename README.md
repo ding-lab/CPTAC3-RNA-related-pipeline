@@ -40,6 +40,7 @@ Detailed about BED12 format can be found in https://genome.ucsc.edu/FAQ/FAQforma
 ####################
 
 #Three tools were used for fusion calling
+
 #Their references (GRCh19) were also downloaded from the corresponding database
 
 STAR-Fusion is downloaded from https://github.com/STAR-Fusion/STAR-Fusion/wiki
@@ -50,7 +51,13 @@ Integrate is downloaded from https://sourceforge.net/p/integrate-fusion/wiki/Hom
 
 # Fusion calling
 
-first run 'perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat' to generate 'to_run.sh' file
+first run
+
+`perl get_link.pl /gscuser/mwyczalk/projects/CPTAC3/import.CPTAC3b1/BamMap/CPTAC3.b1.RNA-Seq.BamMap.dat`
+
+to generate 'to_run.sh' file
+
+
 
 then run 'bash to_run.sh', which runs these three tools individually for each sample
 
@@ -65,7 +72,7 @@ The basic idea for filtering is:
 
 first get the fusions 1) reported by at least 2 callers, or 2) reported by STAR-Fusion (showing higher sensitivity) but with higher supporting evidence (defined by fusion fragments per million total reads, or FFPM, >0.1)
 
-then remove the fusions in the filtering database located in '/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/FilterDatabase', including:
+then remove the fusions in the filtering database 'FilterDatabase', including:
 1) uncharacterized genes, immunoglobin genes, mitochondrial genes, etc.
 2) fusions from the same gene or paralogue genes (downloaded from https://www.genenames.org/cgi-bin/statistics)
 3) fusions reported in normal samples - TCGA normals (from pancan fusion analysis, under review), GTEx tissues (reported in star-fusion output), non-cancer cell study (PMID: 26837576)
