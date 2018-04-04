@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+die "Usage perl filter.pl SAMPLE \n" if (@ARGV < 1);
+
 my $database_dir="/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/FilterDatabase";
 
 my (%black, %paralog, %manual, %noncancer, %tcga_normal, %known, %gtex, %large, %tmp);
@@ -62,9 +64,11 @@ while(<DA>)
 	$known{$_}="";
 }
 
-open(DATA, "Total_Fusions.tsv");
+my $dir = $ARGV[0];
+my $sample = $ARGV[1];
+open(DATA, "$dir/Total_Fusions_in_$sample.tsv");
 <DATA>;
-open(OUT, ">Filtered_Fusions.tsv");
+open(OUT, ">$dir/Filtered_Fusions_in_$sample.tsv");
 while(<DATA>)
 {
 	chomp;
@@ -82,7 +86,7 @@ while(<DATA>)
 	}
 }
 
-open(DATA, "Total_Fusions.tsv");
+open(DATA, "$dir/Total_Fusions_in_$sample.tsv");
 my $header = <DATA>;
 my @h = split(/\t/, $header);
 print OUT join("\t", @h[0..7], $h[9]);

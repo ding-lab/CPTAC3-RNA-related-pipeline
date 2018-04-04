@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-die "Usage perl combine_call.pl DIR \nFilterDB and STARDB are set to be static in the script\n" if (@ARGV < 1);
+die "Usage perl combine_call.pl SAMPLE STARFUSION ERICSCRIPT INTEGRATE_summary INTEGRATE_breakpoint OUTDIR\nFilterDB and STARDB are set to be static in the script\n" if (@ARGV < 1);
 
 my $filterDB = "/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/FilterDatabase";
 open(IN, "$filterDB/hgnc_complete_set.txt");
@@ -26,90 +26,79 @@ while(<IN>)
         }
 }
 
-my $dir = $ARGV[0];
-my (@names, $sample, $cancer, %mark, %star, %integrate, %eric, %gtex);
+my $sample = $ARGV[0];
+my $star = $ARGV[1];
+my (@names, $cancer, %mark, %star, %integrate, %eric, %gtex);
 
-foreach my $input (glob("$dir/*__*/STAR_FUSION/star-fusion.fusion_predictions.abridged.annotated.coding_effect.tsv"))
+open(IN, "$star");
+<IN>;
+while(<IN>)
 {
-	@names = split(/\//,$input);
-	$sample = $names[-3];
-	open(IN, "$input");
-	<IN>;
-	while(<IN>)
+	chomp;
+	my @l = split(/\t/,);
+	my $id = $l[0];
+	if($_=~m/GTEx_Recurrent/)
 	{
-		chomp;
-		my @l = split(/\t/,);
-		my $id = join("\_\_", $sample, $l[0]);
-		if($_=~m/GTEx_Recurrent/)
-		{
-			$gtex{$l[0]} = 1;
-		}
-		$star{$id} = "$l[0]\t$l[5]\t$l[7]\t$sample\t$l[1]\t$l[2]\t$l[13]\t$l[19]";
-		my @m = split(/\-\-/, $l[0]);
-		if(exists $hash{$m[0]})
-		{
-			$mark{$hash{$m[0]}}=$m[0];
-		}
-		if(exists $hash{$m[1]})
-		{
-			$mark{$hash{$m[1]}}=$m[1];
-		}
-		#always use the names in STAR-Fusion
+		$gtex{$l[0]} = 1;
 	}
+	$star{$id} = "$l[0]\t$l[5]\t$l[7]\t$sample\t$l[1]\t$l[2]\t$l[13]\t$l[19]";
+	my @m = split(/\-\-/, $l[0]);
+	if(exists $hash{$m[0]})
+	{
+		$mark{$hash{$m[0]}}=$m[0];
+	}
+	if(exists $hash{$m[1]})
+	{
+		$mark{$hash{$m[1]}}=$m[1];
+	}
+	#always use the names in STAR-Fusion
 }
 
-foreach my $input (glob("$dir/*__*/ERICSCRIPT/*.results.total.tsv"))
+my $eric = $ARGV[2];
+open(IN, "$eric");
+<IN>;
+while(<IN>)
 {
-	@names=split(/\//,$input);
-        $sample = $names[-3];
-	open(IN, "$input");
-	<IN>;
-	while(<IN>)
+	chomp;
+	my @l=split(/\t/,);
+	my $a=(exists $hash{$l[0]} && exists $mark{$hash{$l[0]}}) ? $mark{$hash{$l[0]}} : $l[0];
+	my $b=(exists $hash{$l[1]} && exists $mark{$hash{$l[1]}}) ? $mark{$hash{$l[1]}} : $l[1];
+	if($l[3]=~m/Unable/)
 	{
-		chomp;
-		my @l=split(/\t/,);
-		my $a=(exists $hash{$l[0]} && exists $mark{$hash{$l[0]}}) ? $mark{$hash{$l[0]}} : $l[0];
-        	my $b=(exists $hash{$l[1]} && exists $mark{$hash{$l[1]}}) ? $mark{$hash{$l[1]}} : $l[1];
-		if($l[3]=~m/Unable/)
-		{
-			$l[3]="Unable";
-		}
-		if($l[6]=~m/Unable/)
-		{
-			$l[6]="Unable";
-		}
-		my $id = join("\_\_", $sample, $a."\-\-".$b);
-		$eric{$id} = "$a\-\-$b\tchr$l[2]\:$l[3]\:$l[4]\tchr$l[5]\:$l[6]\:$l[7]\t$sample\t$l[10]\t$l[11]";
-#exact breakpoint info will be extracted using Integrate
+		$l[3]="Unable";
 	}
+	if($l[6]=~m/Unable/)
+	{
+		$l[6]="Unable";
+	}
+	my $id = $a."\-\-".$b;
+	$eric{$id} = "$a\-\-$b\tchr$l[2]\:$l[3]\:$l[4]\tchr$l[5]\:$l[6]\:$l[7]\t$sample\t$l[10]\t$l[11]";
 }
 
-foreach my $input (glob("$dir/*__*/Integrate/summary.tsv"))
+my $integrate_summary = $ARGV[3];
+my $integrate_breakpoint = $ARGV[4];
+open(IN, "$integrate_summary");
+<IN>;
+open(IN2, "$integrate_breakpoint");
+<IN2>;
+while(<IN>)
 {
-        @names=split(/\//,$input);
-        $sample = $names[-3];
-        open(IN, "$input");
-        <IN>;
-	open(IN2, "$dir/$sample/Integrate/breakpoints.tsv");
-	<IN2>;
-        while(<IN>)
-        {
-                chomp;
-                my @l=split(/\t/,);
-		my $match=<IN2>;
-		chomp $match;
-		my @ll = split(/\t/,$match);
-                my $a=(exists $hash{$l[1]} && exists $mark{$hash{$l[1]}}) ? $mark{$hash{$l[1]}} : $l[1];
-                my $b=(exists $hash{$l[2]} && exists $mark{$hash{$l[2]}}) ? $mark{$hash{$l[2]}} : $l[2];
-		my $id = join("\_\_", $sample, $a."\-\-".$b);
-		$integrate{$id} = "$a\-\-$b\tchr$ll[2]\:$ll[4]\:+\tchr$ll[5]\:$ll[7]\:+\t$sample\t$l[6]\t$l[7]";
+	chomp;
+	my @l=split(/\t/,);
+	my $match=<IN2>;
+	chomp $match;
+	my @ll = split(/\t/,$match);
+	my $a=(exists $hash{$l[1]} && exists $mark{$hash{$l[1]}}) ? $mark{$hash{$l[1]}} : $l[1];
+	my $b=(exists $hash{$l[2]} && exists $mark{$hash{$l[2]}}) ? $mark{$hash{$l[2]}} : $l[2];
+	my $id = $a."\-\-".$b;
+	$integrate{$id} = "$a\-\-$b\tchr$ll[2]\:$ll[4]\:+\tchr$ll[5]\:$ll[7]\:+\t$sample\t$l[6]\t$l[7]";
 #strand info will be corrected using EricScript
-        }
 }
 
-open(OUT1, ">Total_Fusions.tsv");
-open(OUT3, ">STARFusion_not.tsv");
-print OUT1 "FusionName\tLeftBreakpoint\tRightBreakpoint\tCancer\_\_Sample\tJunctionReadCount\tSpanningFragCount\tFFPM\tPROT_FUSION_TYPE\tGTEx\tCallerN\n";
+my $outdir = $ARGV[5];
+open(OUT1, ">$outdir/Total_Fusions_in_$sample.tsv");
+open(OUT3, ">$outdir/STARFusion_not.tsv");
+print OUT1 "FusionName\tLeftBreakpoint\tRightBreakpoint\tSample\tJunctionReadCount\tSpanningFragCount\tFFPM\tPROT_FUSION_TYPE\tGTEx\tCallerN\n";
 print OUT3 "#FusionName\tJunctionReadCount\tSpanningFragCount\tSpliceType\tLeftGene\tLeftBreakpoint\tRightGene\tRightBreakpoint\tLargeAnchorSupport\tLeftBreakDinuc\tLeftBreakEntropy\tRightBreakDinuc\tRightBreakEntropy\tFFPM\n";
 
 my $stardb = "/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/GRCh37_gencode_v19_CTAT_lib_July192017/ctat_genome_lib_build_dir";
@@ -185,7 +174,7 @@ foreach my $g (keys %eric)
 }
 
 my $annodir = "/gscmnt/gc2741/ding/qgao/tools/STAR-Fusion/FusionAnnotator";
-my $new_annot = `$annodir/FusionAnnotator --genome_lib_dir $stardb --annotate STARFusion_not.tsv | $annodir/util/fusion_to_coding_region_effect.pl --fusions - --genome_lib_dir $stardb`;
+my $new_annot = `$annodir/FusionAnnotator --genome_lib_dir $stardb --annotate $outdir/STARFusion_not.tsv | $annodir/util/fusion_to_coding_region_effect.pl --fusions - --genome_lib_dir $stardb`;
 my @lines = split(/\n/, $new_annot);
 shift @lines;
 for(my $i=0; $i<=$#lines; $i++)
@@ -228,4 +217,4 @@ for(my $i=0; $i<=$#lines; $i++)
 	my $val = (exists $gtex{$after[0]}) ? 1 : 0;
 	print OUT1 "$after[0]\t$after[5]\t$after[7]\t$tmp_sample[$i]\t$after[1]\t$after[2]\tNA\t$after[19]\t$val\t2\n";
 }
-system("rm -f STARFusion_not.tsv");
+system("rm -f $outdir/STARFusion_not.tsv");

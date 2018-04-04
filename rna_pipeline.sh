@@ -3,7 +3,7 @@
 sample=$1
 fq_1=$2
 fq_2=$3
-cpu=1
+cpu=8
 
 cd ${sample}
 
@@ -12,12 +12,6 @@ mkdir -p FASTQC
 fastqc -o FASTQC -f fastq -t 1 $fq_1 $fq_2
 
 ##Mapping
-##TopHat
-bowtie2_ref=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/Bowtie2/hg19
-gtf=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/GTF/Homo_sapiens.GRCh37.75.gtf
-mkdir -p TOPHAT
-tophat -o TOPHAT -p $cpu -G $gtf $bowtie2_ref $fq_1 $fq_2
-
 #MapSplice
 mkdir -p MAPSPLICE
 bowtie_ref=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/Bowtie/hg19
@@ -30,13 +24,13 @@ rm -f MAPSPLICE/left.fastq MAPSPLICE/right.fastq
 samtools sort -m 20G MAPSPLICE/alignments.bam MAPSPLICE/sorted.alignments
 
 ##Cufflinks
-##TopHat bam
-gtf=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/GTF/Homo_sapiens.GRCh37.75.gtf
-cufflinks -o CUFFLINKS_wTOPHAT -p $cpu --library-type fr-firststrand -g $gtf TOPHAT/accepted_hits.bam
-
 #MapSplice bam
 gtf=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/GTF/Homo_sapiens.GRCh37.75.gtf
 cufflinks -o CUFFLINKS_wMAPSPLICE -p $cpu --library-type fr-firststrand -g $gtf MAPSPLICE/sorted.alignments.bam
+
+#MapSplice bam
+gtf=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/GTF/Homo_sapiens.GRCh37.75.gtf
+cufflinks -o CUFFLINKS_wMAPSPLICE_GTF -p $cpu --library-type fr-firststrand -G $gtf MAPSPLICE/sorted.alignments.bam
 
 ##Generate BED for expressed transcripts
 binDir=/gscmnt/gc2521/dinglab/qgao/Scripts/RNA
@@ -54,6 +48,11 @@ genome_db=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/ericscr
 ericscript.pl -o ERICSCRIPT --remove -ntrim 0 --refid homo_sapiens -db $genome_db -p $cpu -name $sample $fq_1 $fq_2
 
 #Integrate
+bowtie2_ref=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/Bowtie2/hg19
+gtf=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/GTF/Homo_sapiens.GRCh37.75.gtf
+mkdir -p TOPHAT
+tophat -o TOPHAT -p $cpu -G $gtf $bowtie2_ref $fq_1 $fq_2
+
 bwts=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/Integrate/bwts
 bam_dir=/gscmnt/gc2521/dinglab/qgao/RNA/Batch_20171110/$sample/TOPHAT/
 fasta=/gscmnt/gc2521/dinglab/qgao/Reference/GRCh37.75/FusionDatabase/Integrate/hg19.fa
@@ -62,3 +61,10 @@ mkdir -p Integrate
 samtools index $bam_dir/accepted_hits.bam
 samtools index $bam_dir/unmapped.bam
 Integrate fusion -reads Integrate/reads.txt -sum Integrate/summary.tsv -ex Integrate/exons.tsv -bk Integrate/breakpoints.tsv -vcf Integrate/bk_sv.vcf -bedpe Integrate/fusions.bedpe $fasta $annot $bwts $bam_dir/accepted_hits.bam $bam_dir/unmapped.bam
+
+#Merge three tools
+mkdir -p Fusion
+perl combine_call.pl $sample STAR_FUSION/star-fusion.fusion_predictions.abridged.annotated.coding_effect.tsv ERICSCRIPT/${sample}.results.total.tsv Integrate/summary.tsv Integrate/breakpoints.tsv Fusion
+
+#Filtering
+perl filter.pl Fusion $sample
